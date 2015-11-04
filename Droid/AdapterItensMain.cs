@@ -13,12 +13,12 @@ using Android.Widget;
 
 namespace MeusPedidos.Droid
 {
-	public class AdapterItens : BaseAdapter {
+	public class AdapterItensMain : BaseAdapter {
 
 		List<ItemPedido> items;
 		Activity context;
 
-		public AdapterItens(Activity context, List<ItemPedido> items) : base() {
+		public AdapterItensMain(Activity context, List<ItemPedido> items) : base() {
 			this.context = context;
 			this.items = items;
 		}
@@ -44,8 +44,8 @@ namespace MeusPedidos.Droid
 			ItemPedido item = items [position];
 //			LayoutInflater inflater = context.GetSystemService (Context.LayoutInflaterService);
 //			View view = inflater.Inflate (Resource.Layout.Item, null);
-			View view = convertView; // re-use an existing view, if one is available
-			if (view == null) // otherwise create a new one
+			View view = convertView;
+			if (view == null)
 				view = context.LayoutInflater.Inflate(Resource.Layout.Item, null);
 			view.FindViewById<TextView>(Resource.Id.tv_nome).Text = item.Nome;
 			view.FindViewById<TextView>(Resource.Id.tv_quantidade).Text = item.Quantidade.ToString();
