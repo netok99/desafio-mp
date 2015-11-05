@@ -4,7 +4,7 @@ namespace MeusPedidos
 {
 	public class ItemPedido
 	{
-		public ItemPedido (string nome, float preco, float quantidade, Pedido pedido) {
+		public ItemPedido (string nome, float preco, int quantidade, Pedido pedido) {
 			Nome = nome;
 			Preco = preco;
 			Quantidade = quantidade;
@@ -13,7 +13,7 @@ namespace MeusPedidos
 
 		public string Nome { get; set; }
 		public float Preco { get; set; }
-		public float Quantidade { get; set; }
+		public int Quantidade { get; set; }
 		public Pedido Pedido{ get; set; }
 		public DateTime Created { get; set; }
 	}

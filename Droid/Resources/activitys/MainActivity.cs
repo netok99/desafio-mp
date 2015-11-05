@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Android.App;
 using Android.Content;
 using Android.Runtime;
@@ -16,14 +15,14 @@ using Newtonsoft.Json;
 namespace MeusPedidos.Droid
 {
 	[Activity (Label = "MeusPedidos", MainLauncher = true, Icon = "@drawable/icon")]
-	public class MainActivity : Activity
-	{
+	public class MainActivity : Activity {
 
 		Pedido pedido;
 		List<ItemPedido> itens = new List<ItemPedido>();
+		ListView itensPedido;
+		List<ItemPedido> list;
 
-		protected override void OnCreate (Bundle bundle)
-		{
+		protected override void OnCreate (Bundle bundle) {
 			base.OnCreate (bundle);
 			SetContentView (Resource.Layout.Main);
 
@@ -34,21 +33,29 @@ namespace MeusPedidos.Droid
 			Button adicionarPedido = FindViewById<Button> (Resource.Id.btn_add);
 			Button cancelarPedido = FindViewById<Button> (Resource.Id.btn_cancelar);
 
-			try {
-				List<ItemPedido> list = JsonConvert.DeserializeObject<List<ItemPedido>>(Intent.GetStringExtra("itens"));
-				total.Text = Intent.GetStringExtra("total");
-				if (list != null) {
-					itensPedido.Adapter = new AdapterItensMain (this, list);
-				}
-			} catch (Exception e) { }
+//			try {
+//				List<ItemPedido> list = JsonConvert.DeserializeObject<List<ItemPedido>>(Intent.GetStringExtra("itens"));
+//				total.Text = Intent.GetStringExtra("total");
+//				if (list != null) {
+//					itensPedido.Adapter = new AdapterItensMain (this, list);
+//				}
+//			} catch (Exception e) { }
+
+//			adicionarItens.Click += (object sender, EventArgs e) => {
+//				if ( cliente.Text.Trim() != "" ){
+//					pedido = new Pedido(cliente.Text);
+//					Intent intent = new Intent(this, typeof(ItensActivity));
+//					StartActivity(intent); 
+//				} else
+//					Toast.MakeText(this, "Informe o nome do cliente", ToastLength.Long).Show();
+//			};
 
 			adicionarItens.Click += (object sender, EventArgs e) => {
-				if ( cliente.Text.Trim() != "" ){
-					pedido = new Pedido(cliente.Text);
-					Intent intent = new Intent(this, typeof(ItensActivity));
-					StartActivity(intent); 
-				} else
-					Toast.MakeText(this, "Informe o nome do cliente", ToastLength.Long).Show();
+				FragmentTransaction transaction = FragmentManager.BeginTransaction();
+				FragmentDialog dialog = new FragmentDialog();
+				dialog.Show(transaction, "dialog fragment");
+				//retorno do dialog
+				dialog.dialogComplete += DialogComplete;
 			};
 
 			cancelarPedido.Click += (object sender, EventArgs e) => {
@@ -77,7 +84,13 @@ namespace MeusPedidos.Droid
 				Toast.MakeText(this, "Pedido Cadastrado com sucesso.", ToastLength.Long).Show();
 			};
 		}
+
+		void DialogComplete (object sender, OnDialogEventArgs e) {
+			list.Add(new ItemPedido(e.Nome, float.Parse(e.Preco), int.Parse(e.Quantidade), new Pedido("fake")));
+			itensPedido.Adapter = new AdapterItensMain (this, list);
+		}
 	}
+
 }
 
 
