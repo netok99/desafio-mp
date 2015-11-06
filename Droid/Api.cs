@@ -5,42 +5,42 @@ using RestSharp.Extensions.MonoHttp;
 using System.Net;
 using System.Text;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MeusPedidos.Droid
 {
 	public class Api
 	{
-
-		private const string ENDPOINT = "http://localhost:8000/";
+		private const string ENDPOINT = "http://192.168.10.71:8000/";
 
 		public Api () {}
 
-		public string HttpPostRequest(string uri, Dictionary<string,string> postParameters)
-		{
+		public string HttpPostRequest(string uri, string postParameters){
 			string url = ENDPOINT + uri;
-			string postData = "";
-			foreach (string key in postParameters.Keys) {
-				postData += HttpUtility.UrlEncode (key) + "=" + HttpUtility.UrlEncode (postParameters [key]) + "&";
-			}
-
 			try {
-				byte[] data = System.Text.Encoding.ASCII.GetBytes(postData);
-				HttpWebRequest myHttpWebRequest = (HttpWebRequest)HttpWebRequest.Create( url );
-				myHttpWebRequest.Method = "POST";
-				myHttpWebRequest.ContentType = "application/json";
-				myHttpWebRequest.ContentLength = data.Length;
-				Stream requestStream = myHttpWebRequest.GetRequestStream();
-				requestStream.Write(data, 0, data.Length);
-				requestStream.Close();
-				HttpWebResponse myHttpWebResponse = (HttpWebResponse)myHttpWebRequest.GetResponse();
-				Stream responseStream = myHttpWebResponse.GetResponseStream();
-				StreamReader myStreamReader = new StreamReader(responseStream, System.Text.Encoding.Default);
-				string pageContent = myStreamReader.ReadToEnd();
-				myStreamReader.Close();
-				responseStream.Close();
-				myHttpWebResponse.Close();
-//				return pageContent;
-				return myHttpWebResponse.StatusCode.ToString();
+				HttpWebRequest request = WebRequest.Create (url) as HttpWebRequest;
+				request.Method = "POST";
+				request.ContentType = "application/json";
+
+				request.Headers ["Authorization"] = "Basic YWRtaW46YWRtaW4=";
+				request.Timeout = 1 * 60 * 1000;
+
+				using (StreamWriter writer = new StreamWriter(request.GetRequestStream())) {
+					writer.Write(postParameters);
+				}
+
+				using (WebResponse response = request.GetResponse())
+				using (Stream responseStream = response.GetResponseStream())
+				using (StreamReader streamReader = new StreamReader( responseStream )) {
+					var retorno = (JObject.Parse(streamReader.ReadToEnd()) as JObject);
+					if(retorno == null){
+						throw new JsonReaderException("ExecutarMetodoServidor: Não conseguiu fazer Parse do JSON retornado pelo servidor.");
+					}
+					return JsonConvert.SerializeObject( retorno );
+				}
+					
+				return "";
 			} catch ( Exception e ) {
 				Android.Util.Log.Error("http errror", e.Message );
 				return(e.Message);

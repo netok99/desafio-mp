@@ -5,10 +5,13 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
-using RestSharp;
+//using RestSharp;
 using System.Collections.Generic;
 using System.Json;
 using System.Net;
+//using Newtonsoft.Json;
+using System.Collections.Specialized;
+using System.Text;
 using Newtonsoft.Json;
 
 
@@ -17,80 +20,62 @@ namespace MeusPedidos.Droid
 	[Activity (Label = "MeusPedidos", MainLauncher = true, Icon = "@drawable/icon")]
 	public class MainActivity : Activity {
 
-		Pedido pedido;
 		List<ItemPedido> itens = new List<ItemPedido>();
+		TextView total;
+		EditText cliente;
 		ListView itensPedido;
-		List<ItemPedido> list;
+		float count = 0;
 
 		protected override void OnCreate (Bundle bundle) {
 			base.OnCreate (bundle);
 			SetContentView (Resource.Layout.Main);
 
-			EditText cliente = FindViewById<EditText> (Resource.Id.et_cliente);
+			itensPedido = FindViewById<ListView> (Resource.Id.list_itens);
+			cliente = FindViewById<EditText> (Resource.Id.et_cliente);
 			Button adicionarItens = FindViewById<Button> (Resource.Id.bt_itens);
-			ListView itensPedido = FindViewById<ListView> (Resource.Id.list_itens);
-			TextView total = FindViewById<TextView> (Resource.Id.tv_total);
+			total = FindViewById<TextView> (Resource.Id.tv_total);
 			Button adicionarPedido = FindViewById<Button> (Resource.Id.btn_add);
 			Button cancelarPedido = FindViewById<Button> (Resource.Id.btn_cancelar);
-
-//			try {
-//				List<ItemPedido> list = JsonConvert.DeserializeObject<List<ItemPedido>>(Intent.GetStringExtra("itens"));
-//				total.Text = Intent.GetStringExtra("total");
-//				if (list != null) {
-//					itensPedido.Adapter = new AdapterItensMain (this, list);
-//				}
-//			} catch (Exception e) { }
-
-//			adicionarItens.Click += (object sender, EventArgs e) => {
-//				if ( cliente.Text.Trim() != "" ){
-//					pedido = new Pedido(cliente.Text);
-//					Intent intent = new Intent(this, typeof(ItensActivity));
-//					StartActivity(intent); 
-//				} else
-//					Toast.MakeText(this, "Informe o nome do cliente", ToastLength.Long).Show();
-//			};
 
 			adicionarItens.Click += (object sender, EventArgs e) => {
 				FragmentTransaction transaction = FragmentManager.BeginTransaction();
 				FragmentDialog dialog = new FragmentDialog();
-				dialog.Show(transaction, "dialog fragment");
-				//retorno do dialog
-				dialog.dialogComplete += DialogComplete;
+				if (cliente.Text.Trim() == "") {
+					Toast.MakeText(this, "Informe o nome do cliente", ToastLength.Long).Show();
+				} else {
+					dialog.Show(transaction, "dialog fragment");
+					//retorno do dialog
+					dialog.dialogComplete += (object s, OnDialogEventArgs ev) => {
+						itens.Add(new ItemPedido(ev.Nome, float.Parse(ev.Preco), int.Parse(ev.Quantidade), 1));
+						itensPedido.Adapter = new AdapterItensMain (this, itens);
+						count += float.Parse(ev.Preco) * float.Parse(ev.Quantidade);   
+						total.Text = "R$" + count.ToString();   
+					};
+				}
 			};
 
 			cancelarPedido.Click += (object sender, EventArgs e) => {
-				itens.Clear();
-				itensPedido.Adapter = new AdapterItensMain (this, itens);
+				Clear();
 			};
 
 			adicionarPedido.Click += (object sender, EventArgs e) => {
 				Api api = new Api();
-				//salvar pedido
-//				pedido = new Pedido (cliente.Text);
-				string result = api.HttpPostRequest("pedido/", new Dictionary<string, string>() { {"cliente", cliente.Text} });
-
-				foreach (ItemPedido item in itens) { //save itenns Pedidos
-//					api.HttpPostRequest("itenspedidos",new Dictionary<string, string>(){
-//						{"nome", item.Nome},
-//						{"preco", item.Preco.ToString()},
-//						{"quantidade", item.Quantidade.ToString()},
-//						{"pedido", pedido}
-//					});  	
+				Pedido retorno = JsonConvert.DeserializeObject<Pedido>(api.HttpPostRequest("pedidos/", JsonConvert.SerializeObject(new Pedido(cliente.Text))));
+				foreach (ItemPedido item in itens) {
+					api.HttpPostRequest("itenspedidos/", JsonConvert.SerializeObject(new ItemPedido(item.Nome, item.Preco, item.Quantidade, retorno.Id)));
 				}
-
-//				if (response.StatusCode > 399) {
-//					Toast.MakeText(this, "Erro ao processar o pedido", ToastLength.Long).Show();
-//				}
 				Toast.MakeText(this, "Pedido Cadastrado com sucesso.", ToastLength.Long).Show();
+				Clear();
 			};
 		}
 
-		void DialogComplete (object sender, OnDialogEventArgs e) {
-			list.Add(new ItemPedido(e.Nome, float.Parse(e.Preco), int.Parse(e.Quantidade), new Pedido("fake")));
-			itensPedido.Adapter = new AdapterItensMain (this, list);
+		void Clear() {
+			cliente.Text = "";
+			total.Text = "Total : ";
+			itens.Clear();
+			itensPedido.Adapter = new AdapterItensMain (this, itens);
 		}
 	}
-
 }
 
 

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,10 +22,6 @@ namespace MeusPedidos.Droid
 			this.items = items;
 		}
 
-//		public override Object GetItem(int position) {  
-////			return items[position];
-//		}
-
 		public override Java.Lang.Object GetItem (int position)
 		{
 			return null;
@@ -42,8 +37,8 @@ namespace MeusPedidos.Droid
 
 		public override View GetView(int position, View convertView, ViewGroup parent) {
 			ItemPedido item = items [position];
-			View view = convertView; // re-use an existing view, if one is available
-			if (view == null) // otherwise create a new one
+			View view = convertView;
+			if (view == null)
 				view = context.LayoutInflater.Inflate(Resource.Layout.Item, null);
 			view.FindViewById<TextView>(Resource.Id.tv_nome).Text = item.Nome;
 			view.FindViewById<TextView>(Resource.Id.tv_quantidade).Text = item.Quantidade.ToString();

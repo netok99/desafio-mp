@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,8 +25,8 @@ namespace MeusPedidos.Droid {
 			set{ nome = value; }
 		}
 		public string Preco {
-			get{ return quantidade; } 
-			set{ quantidade = value; } 
+			get{ return preco; } 
+			set{ preco = value; } 
 		}
 		public string Quantidade {
 			get{ return quantidade; } 
@@ -47,10 +46,6 @@ namespace MeusPedidos.Droid {
 		private EditText et_quantidade;
 		private Button adicionar;
 
-//		public override void OnCreate (Bundle savedInstanceState){
-//			base.OnCreate (savedInstanceState);
-//		}
-
 		public event EventHandler<OnDialogEventArgs> dialogComplete; 
 
 		public override View OnCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,10 +58,12 @@ namespace MeusPedidos.Droid {
 			adicionar = view.FindViewById<Button> (Resource.Id.bt_adicionar);
 
 			adicionar.Click += (object sender, EventArgs e) => {
-				dialogComplete.Invoke(this, new OnDialogEventArgs(et_nome.Text, et_quantidade.Text, et_preco.Text));
+//				Activity.RunOnUiThread(() => {
+				if ( dialogComplete != null ) {
+					dialogComplete.Invoke(this, new OnDialogEventArgs(et_nome.Text, et_quantidade.Text, et_preco.Text));
+				}
 				this.Dismiss();
 			};
-
 			return view;
 		}
 

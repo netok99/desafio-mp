@@ -36,7 +36,7 @@ namespace MeusPedidos.Droid
 				if (nome.Text.Trim() == "" && preco.Text.Trim() == "" && quantidade.Text.Trim() == ""){
 					Toast.MakeText(this, "Preencha os campos acima", ToastLength.Long).Show();
 				} else {
-					itensPedido.Add(new ItemPedido(nome.Text, float.Parse(preco.Text), int.Parse(quantidade.Text), new Pedido("eu")));
+					itensPedido.Add(new ItemPedido(nome.Text, float.Parse(preco.Text), int.Parse(quantidade.Text), 1));
 					itens.Adapter = new AdapterItensMain (this, itensPedido);
 					total =  total + (float.Parse(preco.Text) * int.Parse(quantidade.Text));
 				}
